@@ -34,10 +34,39 @@
 
 (TEST
  > (namespace-expand 'S3C '())
- (##namespace ("s3c#"))
- ;; XXX should switch back to default upon next compilation unit. extend compiler...
+ (begin (##namespace ("s3c#"))
+	(##namespace
+	 (""
+	  lambda
+	  typed-lambda
+	  def
+	  define-typed
+	  define
+	  begin
+	  ->
+	  type-check
+	  let
+	  if
+	  set!)))
+ ;; XXX should switch back to default upon next compilation
+ ;; unit. extend compiler...
  > (namespace-expand 'SCHEME '())
+ (##namespace (""))
  > (namespace-expand 'S3C '(a b c))
- (begin (##namespace ("s3c#")) a b c (##namespace (""))))
+ (begin (begin (##namespace ("s3c#"))
+	       (##namespace
+		(""
+		 lambda
+		 typed-lambda
+		 def
+		 define-typed
+		 define
+		 begin
+		 ->
+		 type-check
+		 let
+		 if
+		 set!)))
+	a b c (##namespace (""))))
 
 
