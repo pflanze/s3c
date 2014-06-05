@@ -1,0 +1,22 @@
+- should |if| handle nothing as false? (Any kind of nothing.)
+  hmm. wow. There we have various kinds of nothing then. Wonderful.
+
+
+- refcounting: free should check whether object has a refcount?  or
+  well, if it is 1, then free it directly as normal.  Otherwise,
+  decrement. Thus mutation only happens on non-normal-free
+  case. fine?!
+
+  Although, increments--but where do those happen ?
+
+  -- build refcounting on top of S3C?  [should build closures on top,
+     as well?]
+
+
+- destructive updates (inplace instead of copying) automatic? no,
+  would be a layer on top? or, if free flag is true then we're free to
+  reuse, so, hand coded in places where that's possible?  (But: what
+  about use-after-free issues: bad, testing wouldn't reveal those
+  correctly (or use a 'generation counter' (part of refcount?)
+  field?). Thus: ?)
+

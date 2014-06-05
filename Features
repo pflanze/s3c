@@ -1,0 +1,84 @@
+NON-Features:
+
+- no vararg. instead use (stack-allocated) array, with length, and
+  pass that. And use macros for convenient calling. ok?  (vararg
+  functions like * will not be used in this fashion, instead dispatch
+  specified statically: currently by way of naming the method directly
+  (like |int.int.*|), perhaps later through letting compiler
+  statically select type from context.)
+
+
+Features:
+
+(- array: uniform, element without type tags in unsafe implementation)
+
+- booleans: use separate type in source language, ok?
+  (Or is that a bad idea re interfacing with C code?)
+
+- just runtime checking. The idea is to use extensive (property-based)
+  tests with the safe implementation to catch all safety issues. Once
+  no exceptional cases can be found anymore, the production build can
+  be created (through translation to C).
+
+  BUT: statically typed lexicals. So that translation can work easily.
+  XXX why not check those in compiler, even safe one?  Also, no
+  inference at all (dependently typed? but even then some can work
+  right?) (In any case how to type the C output. A OH: how to
+  generics.)
+
+- no call/cc, except as a debugging feature in the safe
+  implementation
+
+- no exception handling, except by overriding the error procedure
+  which does an abort in the C implementation and a Scheme exception
+  in the safe implementation by default. (Meaning: no chance for
+  cleanups; memory could be deallocated though when using a custom
+  allocator.)
+
+  Reasoning: not necessary. Any problem that could occur at runtime
+  should have been catched by the code explicitely already (like
+  missing pattern match cases (provide case if necessary), division by
+  zero (check for zero), number overflows (use op that returns
+  overflow flag and check for that instead)). Out of memory might be
+  the only one difficult to handle explicitely: allow optional handler
+  in every spot that heap-allocates (|heap| form)? And for the stack,
+  allow optional handler in recursive calls?
+
+  Then instead perhaps build something on top to make handling
+  erroneous cases (like OS calls) syntactically easier?
+
+  (If reasoning turns out to be wrong, could always implement
+  exception handling by way of implicit return codes. May need
+  additional syntax to add optional cleanup forms (or use the same as
+  the one in the above paragraph).)
+
+- number overflow checking (separately named C procedures for every
+  number type; resolve to them at compile time)
+
+- perhaps generic number ops: need to be resolved at compile time from
+  the argument types (can't rely on overloading of number ops in C as
+  we need to call separate C procedures for every number type to get
+  overflow checking (although it might be possible to choose names by
+  using CPP macros instead?)).
+
+- dynamically scoped allocation: on the stack in C implementation, on
+  a list based stack in safe mode (so that call/cc can
+  work). Deallocation-checked in safe implementation (to guard against
+  use-after-free cases).
+
+- heap based allocation: new, malloc, and free calls; new for typed
+  values (type safe in safe implementation), malloc plain byte arrays
+  (with bounds checking in safe implementation). In safe
+
+
+- |TC|, |trampoline|: optimized tail calls
+  - |TC| returns structure that represents a function call (use
+    memory allocated by caller)
+  - outside, need |trampoline| to call it
+
+- |label|: local, non-firstclass optimized tail calls
+  - does not define functions, but 'syntactical' entities
+  - XX check that calls of the label are in tail position re label
+    definition
+
+- add closures? I guess we want that. Manual allocation etc.

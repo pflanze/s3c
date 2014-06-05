@@ -1,0 +1,5 @@
+Ideas to write on top:
+
+Use it as compile target for a dynamic language with GC (and optional
+explicit typing and memory allocation). Then how to interact between
+GC and explicitly maintained memory?

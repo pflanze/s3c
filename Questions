@@ -1,0 +1,68 @@
+
+(Exceptions:
+
+- what about out of stack memory errors in the C implementation?
+
+- what about out-of-memory exceptions? These can't be eliminated
+  through testing, as memory availability is not under the tester's
+  control. But they may exert code paths that are not otherwise
+  tested. -> need faking of out-of-memory conditions?
+
+- how to handle exceptions really, rather, which cleanups to run?
+  (how should the programmer declare which cleanups belong to which
+  scope? scopes?)
+
+=> all solved by simply not offering exceptions; all errors are going
+   to abort. Ok?)
+
+
+Other:
+
+- what kind of language is to be used in tests? Scheme or S3C?
+  (And what in macros? Clearly Scheme, right?)
+
+- how to pass small values as generic type: pointer to it, or
+  immediate (cast value to pointer)?
+
+- how to do test coverage measurement? With gcov etc. on the C
+  version? Then the test suite needs to be able to call the C versions
+  (FFI, but how to represent in-memory data structures?). Or, in the
+  safe implementation (making it even slower)? Advantage of the
+  latter: could also measure more like type coverage.
+
+[- how to return objects: let caller allocate space, right?  Well yes:
+  differ in return types between pointers, and actual objects. Ok.]
+
+- add parametrized types? (i.e. procedures with type checkers)
+
+
+- Hm optionally offer GC?: Boehm GC: use it for parts of the program
+  that are not speed sensitive (parser)? And use Boehm GC's GC_FREE in
+  places where manual deallocation is done, to avoid triggering GC in
+  the interpreter? But, (streams!) will possibly also need to use
+  allocation primitives from gc_typed.h, and even then, not safe for
+  reason of stack memory, right?
+
+  Refcounting: possibly nice in some apps, yes. But painful for the
+  manual reference cycle resolving. So, would it help at all? Question
+  is really: is it necessary or are unique ptrs enough already
+  (perhaps library separation is an issue; tho, with macros this may
+  be parametrizable?).
+
+- what about bounds checking and memory sizes, does it have to be
+  bytes after all, or, something ?  which are those cases?
+
+(- immediates vs. pointers:
+  purely a usage thing, nothing to be worried about in compiler?)
+
+(- uint32 etc: use struct wrappers for uniformity, or avoid them to
+   get nicer human readable code?)
+
+- uint32 vs int32 etc.:
+  - perhaps wrap in struct in C, too?
+  - conversion always through asserting functions, too, ok?
+  - constants need constructor wrappers, too. (Or, added by compiler.)
+
+- separation of type language from runtime language (types are not
+  runtime predicates; predicates only allowed for type unions)
+

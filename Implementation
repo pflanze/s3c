@@ -1,0 +1,90 @@
+Implementation of compiler to C
+-------------------------------
+
+Example (see ex.scm):
+
+    (defn (sumto-iter (nat0 z) (nat0 x)) (either nat0 TC?)
+      (if (zero? x)
+	  z
+	  (TC sumto-iter (+ z x) (dec x))))
+
+- allocation of return values are the duty of the caller
+- caller will thus allocate union that holds either a nat0 or a TC
+  (XX: unions are always of the max size of their members; always ok?)
+- sumto_iter takes pointer to this as its first argument,
+  and will tag it with the type
+- hence need to define type tags somewhere global (header file?)
+
+Closures:
+
+- as 2 arguments (functionpointer and context) or in a struct?
+  structs on the fly needs anonymous (well, randomly-named) structs,
+  moving to toplevel. 2 arguments needs, less? In both cases, calling
+  normal C functions needs a FFI. (2-argument approach may be better
+  since some C libraries are using that already; but then, assumptions
+  about putting the 2 arguments together or so may not hold, hence,
+  interfacing layer required anyway, thus structs work as well again.)
+
+  XXX. Don't know size of closures in caller. Or needs solution
+  similar to size of structs. Hm.
+  (When would size be relevant? Only when copied. Never copy them?
+  Don't allow it?)
+
+
+Optional 'safe C' mode?:
+
+- with type tags even for non-unions (or, in pointer values? but
+  probably no)
+
+- memory allocator that doesn't reuse pointers quickly? Or tags?
+  (or always use refcounts, i.e. prevent free'ing unless really unused?)
+  but how with stack memory?
+
+
+Implementation of safe interpreter
+----------------------------------
+
+- how to mark objects as deallocated? -> have a special field in them,
+  uniformly
+
+- use "will" (GC release hook) for every object, that checks whether
+  object *has* been deallocated.
+
+- stack based objects: released upon return from scope.  (stack:
+  linked list? but then, perhaps just in lexical env of Scheme code it
+  has been translated to or so.)
+
+- XXX: how to implement flat object vs pointer?  Malloc and alloca as
+  vector allocations? (with wrapper with dealloc notification etc.?)
+  Then (deftype pointer [typetag] container index).  Then hold type in
+  pointer only, or tag word within container body?  (Well heh:
+  cj-structs already implemented as vector with type tag in head,
+  thus, really just continue this, right?)
+
+- uninitialized members (bytes?): with some 'uninitialized tag.
+
+
+(Runtime) type checking
+-----------------------
+
+IDEA:  pattern matching"?"  
+
+  #((just nat0) x)
+
+=> (just nat0) is a function that receives x (as to date), but returns
+a (maybe nat0), and if that is nothing, it gives a type error, and if
+it is a just, then the contained value is used. I.e. instead of seeing
+x (which is a (just nat0)) within the function body, the contained
+nat0 is used.
+
+Then function wrappers can be used, too. Problem of how to do type
+intersection is solved.
+
+Although, what about this?:
+
+  #((maybe nat0) x)
+
+That can't 'pattern match' (extract values (remove wrappers), that
+is). Pattern match must be outside (I mean, in function body) here.
+Messy/useless?
+
