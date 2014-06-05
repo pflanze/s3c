@@ -58,7 +58,7 @@
 		     TEST:count-fail " failure(s)" "\n"))
 	(set! TEST:running #f))))
 
-(defmacro (test e)
+(defmacro (%test e)
   `(begin
      (begin (display "test form: ") (write ',e) (newline))
      (,e)))

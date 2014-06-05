@@ -54,8 +54,8 @@
       2
       > (f 3)
       6))
- > (test (t-factorial s3c#factorial))
- > (test (t-factorial s3c#factorial2)))
+ > (%test (t-factorial s3c#factorial))
+ > (%test (t-factorial s3c#factorial2)))
 
 
 (deftypealias nat0 uint64)
@@ -122,8 +122,8 @@
       3
       > (f 10)
       55))
- > (test (t-sumto s3c#sumto))
- > (test (t-sumto s3c#sumto2)))
+ > (%test (t-sumto s3c#sumto))
+ > (%test (t-sumto s3c#sumto2)))
 
 
 ;; data type definition:
